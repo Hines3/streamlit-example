@@ -4,7 +4,7 @@ import math
 import pandas as pd
 import streamlit as st
 
-python -m pip install seaborn
+!pip install seaborn
 
 import numpy as np
 import pandas as pd
