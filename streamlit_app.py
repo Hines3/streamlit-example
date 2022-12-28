@@ -231,4 +231,4 @@ df = getALL([ticker], start_date)
 
 st.write(df)
 
-st.line_chart(getClose([ticker], start_date).values)
+
