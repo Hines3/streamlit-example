@@ -231,25 +231,4 @@ df = getALL([ticker], start_date)
 
 st.write(df)
 
-company1 = get_ticker("GOOGL")
-company2 = get_ticker("MSFT")
-# fetches the data: Open, Close, High, Low and Volume
-google = yf.download("GOOGL", start="2021-10-01", end="2021-10-01")
-microsoft = yf.download("MSFT", start="2021-10-01", end="2021-10-01")
-# Valid periods: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max
-data1 = company1.history(period="3mo")
-data2 = company2.history(period="3mo")
-# markdown syntax
-st.write("""
-### Google
-""")
-# detailed summary on Google
-st.write(company1.info['longBusinessSummary'])
-st.write(google)
-# plots the graph
-st.line_chart(data1.values)
-st.write("""
-### Microsoft
-""")
-st.write(company2.info['longBusinessSummary'], "\n", microsoft)
-st.line_chart(data2.values)
+st.line_chart(getClose([ticker], start_date)
