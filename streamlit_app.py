@@ -226,6 +226,10 @@ st.title("Stock DashBoard")
 st.header("10 Momentum Trend Indicator Anaylsis")
 
 ticker = st.text_input('Stock Ticker')
+start_date = st.date_input('Start Date')
+df = getALL([ticker], start_date)
+
+st.write(df)
 
 company1 = get_ticker("GOOGL")
 company2 = get_ticker("MSFT")
