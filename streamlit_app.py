@@ -222,9 +222,11 @@ def getALL(ticker_list, start_date):
 
 
 # Project Details
-st.title("Build and Deploy Stock Market App Using Streamlit")
-st.header("A Basic Data Science Web Application")
-st.sidebar.header("Geeksforgeeks \n TrueGeeks")
+st.title("Stock DashBoard")
+st.header("10 Momentum Trend Indicator Anaylsis")
+
+st.text_input('Stock Ticker')
+
 company1 = get_ticker("GOOGL")
 company2 = get_ticker("MSFT")
 # fetches the data: Open, Close, High, Low and Volume
