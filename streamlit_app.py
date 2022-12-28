@@ -23,10 +23,10 @@ st.write("""
 ### Google
 """)
 # detailed summary on Google
-st.write(company1.info['longBusinessSummary']) 
+st.write(company1.info['longBusinessSummary'])
 st.write(google)
 # plots the graph
-st.line_chart(data1.values) 
+st.line_chart(data1.values)
 st.write("""
 ### Microsoft
 """)
