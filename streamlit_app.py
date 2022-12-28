@@ -1,11 +1,11 @@
 import streamlit as st
 import yfinance as yf
- 
+
 def get_ticker(name):
-    company = finance.Ticker(name)  # google
-    return company
- 
- 
+  company = finance.Ticker(name)  # google
+  return company
+
+
 # Project Details
 st.title("Build and Deploy Stock Market App Using Streamlit")
 st.header("A Basic Data Science Web Application")
