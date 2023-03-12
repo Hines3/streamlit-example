@@ -6,6 +6,4 @@ sklearn
 yfinance
 finta
 ta
-STL
-ARIMA
-STLForecast
+
