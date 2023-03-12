@@ -1,234 +1,54 @@
+
 import streamlit as st
-import numpy as np
-import pandas as pd
 import yfinance as yf
-from finta import TA
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ALL BUILT FUNCTIONS FOR CODE
-
-# GET CLOSING CHART OF STOCK
-def getClose(tickers, start_date):
-
-  for stock in tickers:
-    df = yf.download(stock, start=start_date, interval='1D').reset_index()
-    df = df.fillna(0)
-
-  return df
-
-def getRSI(data):
-  condition = 0
-
-  df = TA.RSI(data)
-  df = df.fillna(0)
-
-  last = df[len(df)-1]
-  
-  if 50 <= last <= 70:
-    condition = 'BUY'
-  elif last > 70:
-    condition = 'BUY'
-  elif 30 <= last < 50:
-    condtition = 'SELL'
-  elif last < 30:
-    condition = 'SELL'
-
-  return condition
-
-def getMACD(data):
-  condition = 0
-  df = TA.MACD(data)
-  df = df.fillna(0)
-
-  MACD = df['MACD'][len(df)-1]
-  SIGNAL = df['SIGNAL'][len(df)-1]
-
-  if MACD < 0 or SIGNAL < 0:
-    if MACD > SIGNAL:
-      condition = 'SELL'
-    if MACD <= SIGNAL:
-      condition = 'SELL'
-  if MACD >= 0 or SIGNAL >= 0:
-    if MACD > SIGNAL:
-      condition = 'BUY'
-    if MACD <= SIGNAL:
-      condition = 'BUY'
-
-  return condition
-  
-def getADX(data):
-  condition = 0
-
-  df = TA.ADX(data)
-  df = df.fillna(0)
-
-  last = df[len(df)-1]
-
-  if last >= 20:
-    condition = 'Strong Direction'
-  else:
-    condition = 'Directionless'
-
-  return condition
-
-def getROC(data):
-  condition = 0
-
-  df = TA.ROC(data)
-  df = df.fillna(0)
-
-  last = df[len(df)-1]
-
-  if last >= 0:
-    condition = 'BUY'
-  else:
-    condition = 'SELL'
-
-  return condition
-
-def getBBANDS(data):
-  condition = 0
-
-  df = TA.BBANDS(data)
-  df = df.fillna(0)
-
-  last = df['BB_MIDDLE'][len(df)-1]
-  last_close = data['Close'][len(data)-1]
-
-  if last_close < last:
-    condition = 'SELL'
-  else:
-    condition = 'BUY'
-
-  return condition
-
-def getMOM(data):
-  condition = 0
-
-  df = TA.MOM(data)
-  df = df.fillna(0)
-
-  last = df[len(df)-1]
-  
-
-  if last < 0:
-    condition = 'SELL'
-  else:
-    condition = 'BUY'
-
-  return condition
-
-def getSMA(data):
-  condition = 0
-
-  df = TA.SMA(data)
-  df = df.fillna(0)
-
-  last = df[len(df)-1]
-  last_close = data['Close'][len(data)-1]
-
-  if last_close < last:
-    condition = 'SELL'
-  else:
-    condition = 'BUY'
-
-  return condition
-
-def getAO(data):
-  condition = 0
-
-  df = TA.AO(data)
-  df = df.fillna(0)
-
-  last = df[len(df)-1]
-  
-
-  if last < 0:
-    condition = 'SELL'
-  else:
-    condition = 'BUY'
-
-  return condition
-
-def getEBBP(data):
-  condition = 0
-
-  df = TA.EBBP(data)
-  df = df.fillna(0)
-
-  BULL = df['Bull.'][len(df)-1]
-  BEAR = df['Bear.'][len(df)-1]
-
-  if BULL + BEAR < 0:
-    condition = 'SELL'
-  else:
-    condition = 'BUY'
-
-  return condition
-
-def getSAR(data):
-  condition = 0
-
-  df = TA.SAR(data)
-  df = df.fillna(0)
-
-  last = df[len(df)-1]  
-  last_close = data['Close'][len(data)-1]
-
-  if last > last_close:
-    condition = 'SELL'
-  else:
-    condition = 'BUY'
-
-  return condition
-
-def getALL(ticker_list, start_date):
-  df = getClose(ticker_list, start_date)
-
-  a = getADX(df)
-  b = getAO(df)
-  c = getRSI(df)
-  d = getMACD(df)
-  e = getSAR(df)
-  f = getEBBP(df)
-  g = getSMA(df)
-  h = getMOM(df)
-  i = getBBANDS(df)
-  j = getROC(df)
-
-  ls = [a,b,c,d,e,f,g,h,i,j]
-
-  return ls
-
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Project Details
-st.title("Stock DashBoard")
-st.header("10 Momentum Trend Indicator Anaylsis")
-
-ticker = st.text_input('Stock Ticker')
-start_date = st.date_input('Start Date')
-df = getALL([ticker], start_date)
-
-st.write(df)
-
-
+from statsmodels.tsa.seasonal import STL
+from statsmodels.tsa.arima.model import ARIMA
+import matplotlib.pyplot as plt
+from statsmodels.tsa.forecasting.stl import STLForecast
+
+# Define a function to retrieve stock price data using yfinance
+def get_stock_data(ticker, start_date):
+    data = yf.download(ticker, start_date)
+    return data['Close']
+
+# Define the main function of your Streamlit app
+def main():
+    # Add a title to your app
+    st.title("Stock Price Forecasting App")
+    
+    # Add a sidebar with input fields for the ticker and start date
+    st.sidebar.title("Input Parameters")
+    ticker = st.sidebar.text_input("Ticker", "XME")
+    start_date = st.sidebar.date_input("Start Date")
+    
+    # Retrieve the stock price data
+    df = get_stock_data(ticker, start_date)
+    
+    # Perform seasonal-trend decomposition of the time series data using STL
+    stl = STL(df, period=13)
+    res = stl.fit()
+    
+    # Plot the STL decomposition
+    st.write("Seasonal-Trend Decomposition")
+    fig = res.plot()
+    st.pyplot(fig)
+    
+    # Perform time series forecasting using ARIMA and STL
+    st.write("Time Series Forecasting")
+    st.write("ARIMA Model Parameters: order=(1, 1, 0), trend='t', period=12")
+    stlf = STLForecast(df, ARIMA, period=12, model_kwargs=dict(order=(1, 1, 0), trend="t"))
+    stlf_res = stlf.fit()
+    forecast = stlf_res.forecast(24)
+    fig, ax = plt.subplots()
+    ax.plot(df, label='Actual')
+    ax.plot(forecast, label='Forecast')
+    ax.legend()
+    st.pyplot(fig)
+    
+    # Display the summary statistics of the forecasting model
+    st.write("Summary Statistics of the Forecasting Model")
+    st.write(stlf_res.summary())
+
+# Call the main function of your Streamlit app
+if __name__ == "__main__":
+    main()
